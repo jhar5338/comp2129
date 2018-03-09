@@ -1,0 +1,189 @@
+/**
+ * comp2129 - assignment 1
+ * justin harding
+ * 450221916 jhar5338
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void err();
+void getInput();
+void inputMines();
+void printGrid();
+void printBorder();
+void uncover();
+void flag();
+void victory();
+		
+int main(void) {
+		
+	int width,height,inputInt1,inputInt2,minesFlagged=0,uncovers=0;
+	char input_char;
+	
+	getInput(&inputInt1,&inputInt2,&input_char);
+	
+	// check if input char is valid
+	if (input_char!='g')
+		err();
+			
+	// assign width and height to 2 input ints since first line should be grid dimensions
+	width = inputInt1;
+	height = inputInt2;
+			
+	// check if width and height are valid
+	if (width*height<10||width>100||height>100)
+		err();
+			
+	int length = width*height;
+	char grid[length];
+			
+	// initialize all grid values to character denoting covered cell
+	for (int i=0;i<length;i++) 
+		grid[i] = '*';
+			
+	inputMines(&inputInt1,&inputInt2,&input_char,width,height,grid);
+			
+	// infinite loop to get player moves until win/loss/err occurs
+	while(1){
+		getInput(&inputInt1,&inputInt2,&input_char);
+		
+		// check if input coords are valid
+		if (inputInt1<0||inputInt1>=width||inputInt2<0||inputInt2>=height)
+			err();
+		else if(input_char=='u') {
+			uncovers++;
+			uncover(&inputInt1,&inputInt2,width,height,grid);
+			printGrid(width,height,grid);
+			victory(uncovers,width,height,minesFlagged,grid);
+		}
+		else if(input_char=='f') {
+			flag(&inputInt1,&inputInt2,width,height,grid);
+			minesFlagged++;
+			if (minesFlagged>10)
+				err();
+			victory(uncovers,width,height,minesFlagged,grid);
+		}
+		else
+			err();
+	}
+	return 0;
+}	
+
+// function for error handling
+void err(void) {
+			
+	printf("error\n");
+	exit(1);
+}
+
+// get input and check format
+void getInput(int *inputInt1,int *inputInt2,char *input_char) {
+			
+	char dummy,input_str[100];
+	int nb,expected=3;
+			
+	fgets(input_str,10,stdin);
+	nb = sscanf(input_str, "%c %d %d %c\n",input_char,inputInt1,inputInt2,&dummy);
+			
+	if (nb!=expected)
+		err();
+	printf("%s",input_str);
+}
+		
+// get input to place 10 mines
+void inputMines(int *inputInt1,int *inputInt2,char *input_char,int width,int height,char *grid) {
+			
+	for (int i=0;i<10;i++) {
+				
+		getInput(inputInt1,inputInt2,input_char);
+				
+		// check if input char and input coords are valid and bomb not already placed in coords
+		if (*input_char!='b'||*inputInt1<0||*inputInt1>=width||*inputInt2<0||*inputInt2>=height||grid[*inputInt1+*inputInt2*width]=='b')
+			err();
+		
+		grid[*inputInt1+*inputInt2*width]='b';
+	}
+	printGrid(width,height,grid);
+}
+		
+// used to display the grid
+void printGrid(int width,int height,char *grid) {
+			
+	printBorder(width);
+	for (int i=0;i<height;i++) {
+		printf("|");
+		for (int j=0;j<width;j++) {
+			if (grid[j+i*width]=='b') {
+				printf("*");
+				continue;
+			}
+			if (grid[j+i*width]=='c') {
+				printf("f");
+				continue;
+			}
+			printf("%c",grid[j+i*width]);
+		}
+		printf("|\n");
+	}
+	printBorder(width);
+}
+	
+// used to print top and bottom of grid border
+void printBorder(int width) {
+	
+	printf("+");
+	for (int i=0;i<width;i++) 
+		printf("-");
+	printf("+\n");
+}
+
+// used to uncover cells
+void uncover(int *inputInt1,int *inputInt2,int width,int height,char *grid) {
+	
+	int adj = 0,above=*inputInt2-1,left=*inputInt1-1,below=*inputInt2+1,right=*inputInt1+1;
+	int current=*inputInt1+*inputInt2*width;
+	// if selected coords contains bomb then print lost and exit
+	if (grid[current]=='b'||grid[current]=='c') {
+		printf("lost\n");
+		exit(0);
+	}
+	// if selected coords has been interacted with then err
+	if (grid[current]!='*'&&grid[current]!='f')
+		err();
+	
+	// check all adj cells to see if out of bounds, if not then check for bomb
+	for (int i=above;i<=below;i++){
+		for (int j=left;j<=right;j++){
+			if (i>=0&&i<height&&j>=0&&j<width) {
+				if (grid[j+i*width]=='b'||grid[j+i*width]=='c') 
+					adj++;
+			}
+		}			
+	}
+	grid[current]=adj+'0';
+}
+		
+// used to flag cell
+void flag(int *inputInt1,int *inputInt2,int width,int height,char *grid) {
+	
+	int current=*inputInt1+*inputInt2*width;
+	
+	// if flagging a cell with bomb, use char c
+	if (grid[current]=='b')
+		grid[current]='c';
+	else 
+		grid[current] = 'f';
+
+	printGrid(width,height,grid);
+}
+		
+// used to check if victory has been reached
+void victory(int uncovers,int width,int height,int minesFlagged,char *grid) {
+
+	if (uncovers==width*height-10&&minesFlagged==10) {
+		printf("won\n");
+		exit(0);
+	}
+}
