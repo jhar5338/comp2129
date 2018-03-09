@@ -1,0 +1,7 @@
+sum a
+set a 1 2 3 4 5
+get a
+sum a
+set b
+sum b
+bye

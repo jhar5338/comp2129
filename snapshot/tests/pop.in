@@ -1,0 +1,10 @@
+pop a
+set a 1 2 3
+get a
+pop a
+pop a
+pop a
+pop a
+del a
+pop a
+bye

@@ -1,0 +1,11 @@
+append a 1
+get a
+set a
+get a
+append a
+get a
+set a 1
+append a 2 3 4 5
+get a
+append b
+bye

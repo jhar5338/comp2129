@@ -1,0 +1,7 @@
+min a
+set a 1 0 -1
+get a
+min a
+set b
+min b
+bye

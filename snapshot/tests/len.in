@@ -1,0 +1,7 @@
+len a
+set a 1 2 3 4 5
+get a
+len a
+set b
+len b
+bye

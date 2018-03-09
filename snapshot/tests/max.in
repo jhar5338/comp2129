@@ -1,0 +1,7 @@
+max a
+set a 1 0 -1
+get a
+max a
+set b
+max b
+bye
